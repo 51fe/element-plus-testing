@@ -1,9 +1,9 @@
-import { render } from '@testing-library/vue'
+import { mount } from '@vue/test-utils'
 import ElementPlus from 'element-plus'
 import CN from 'element-plus/lib/locale/lang/zh-cn'
 
-export const customRender = (ui, overrides) => {
-  return render(ui, {
+export const customMonut = (ui, overrides) => {
+  return mount(ui, {
     global: {
       plugins: [[ElementPlus, ...[{ locale: CN }]]]
     },
@@ -11,5 +11,5 @@ export const customRender = (ui, overrides) => {
   })
 }
 export { defineComponent, ref, reactive, nextTick } from 'vue'
-export * from '@testing-library/vue'
-export { customRender as render }
+export * from '@vue/test-utils'
+export { customMonut as mount }

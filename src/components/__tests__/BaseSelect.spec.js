@@ -1,4 +1,4 @@
-import { fireEvent, screen, render } from '../../test-util'
+import { nextTick, mount } from '../../test-util'
 import BaseSelect from '../BaseSelect.vue'
 
 const options = [{
@@ -14,64 +14,50 @@ const options = [{
 
 const defaultPlaceholder = '请选择'
 
-const setUp = (overrides) => {
-  return render(BaseSelect, {
+const setup = (props) => {
+  return mount(BaseSelect, {
     props: {
       options,
-      ...overrides
+      ...props
     }
   })
 }
 
-const getOptionByLabel = (label) => screen.getByRole('listitem', {
-  hidden: true,
-  name: (content, el) => el.textContent === label
-})
-
 test('renders correctly by default', async () => {
-  const { html } = setUp()
-  screen.getByPlaceholderText(defaultPlaceholder)
-  options.forEach((item) => {
-    getOptionByLabel(item.label)
-  })
-  const list = screen.getAllByRole('listitem', { hidden: true })
-  expect(list).toHaveLength(options.length)
-  expect(html()).toMatchSnapshot()
+  const wrapper = setup()
+  expect(wrapper.props('placeholder')).toBe('请选择')
+  expect(wrapper.props('modelValue')).toBe('')
+  expect(wrapper.html()).toMatchSnapshot()
 })
 
 test('changes props correctly', async () => {
-  const placeholder = '请选择营运商'
   const modelValue = 3
-  setUp({
-    placeholder,
-    modelValue
-  })
-  // change placeholder and current selected
-  await screen.findByPlaceholderText(placeholder)
-  expect(getOptionByLabel('电信')).toHaveClass('selected')
+  const placeholder = '请选择营运商'
+  const wrapper = setup()
+  // Placeholder
+  await wrapper.setProps({ placeholder })
+  expect(wrapper.props('placeholder')).toBe(placeholder)
+  // modelValue
+  await wrapper.setProps({ modelValue })
+  expect(wrapper.props('modelValue')).toBe(modelValue)
 })
 
 test('emits input event correctly when selected', async () => {
-  const { emitted } = setUp()
+  const value = 3
+  const wrapper = setup()
   //  trigger an update event by clicking the <option> element.
-  await fireEvent.click(getOptionByLabel('电信'))
-  expect(emitted()['update:modelValue'][0]).toEqual([3])
+  await wrapper.setValue(value)
+  expect(wrapper.emitted('update:modelValue')[0]).toEqual([value])
 })
 
 test('Passes and returns a string when select multiple items', async () => {
-  const modelValue = '1, 2'
-  const { emitted } = setUp({
-    multiple: true,
-    modelValue
-  })
-  // current selected 移动, 联通
-  modelValue.split(',').forEach(id => {
-    const found = options.find(item => item.value === parseInt(id))
-    if (found) {
-      getOptionByLabel(found.label)
-    }
-  })
+  const modelValue = '1,2'
+  const wrapper = setup({ modelValue, multiple: true })
+  await nextTick()
+  const tags = wrapper.findAll('.el-select__tags-text')
+  expect(tags[0].element).toHaveTextContent('移动')
+  expect(tags[1].element).toHaveTextContent('联通')
   // select all
-  await fireEvent.click(getOptionByLabel('电信'))
-  expect(emitted()['update:modelValue'][0]).toEqual(['1,2,3'])
+  await wrapper.setValue('1,2,3')
+  expect(wrapper.emitted()['update:modelValue'][0]).toEqual(['1,2,3'])
 })

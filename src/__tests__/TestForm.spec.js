@@ -1,14 +1,13 @@
 import { vi } from 'vitest'
-import { fireEvent, screen, render, within } from '../test-util'
+import { mount, nextTick } from '../test-util'
 import TestForm from '../TestForm.vue'
 import { rules } from '../config'
 
 const setup = () => {
-  const result = render(TestForm)
-  const ageItem = screen.getByLabelText(/age/i)
-  const ageInput = within(ageItem).getByRole('textbox')
+  const wrapper = mount(TestForm)
+  const ageInput = wrapper.find('input')
   return {
-    ...result,
+    wrapper,
     ageInput
   }
 }
@@ -25,37 +24,36 @@ afterEach(() => {
 })
 
 test('shows required error message without input', async () => {
-  const { ageInput } = setup()
-  await fireEvent.blur(ageInput)
+  const { wrapper, ageInput } = setup()
+  await ageInput.trigger('blur')
   // bug: should be invalid
-  expect(await screen.findByText(requiredRE)).toBeInTheDocument()
-  expect(console.warn).not.toHaveBeenCalled()
+  await nextTick()
+  expect(wrapper.get('.el-form-item__error').element).toHaveTextContent(requiredRE)
+  expect(console.warn).toHaveBeenCalled()
 })
 
 test('shows number error message when input a string', async () => {
-  const { ageInput } = setup()
-  await fireEvent.update(ageInput, 'abc')
-  await fireEvent.blur(ageInput)
+  const { wrapper, ageInput } = setup()
+  await ageInput.setValue('abc')
+  await ageInput.trigger('blur')
   // bug: should be invalid
-  expect(await screen.findByText(numberRE)).toBeInTheDocument()
+  await nextTick()
+  expect(wrapper.get('.el-form-item__error').element).toHaveTextContent(numberRE)
   expect(console.warn).toHaveBeenCalled()
 })
 
 test('form is valid when input a number', async () => {
-  const { ageInput } = setup()
-  await fireEvent.update(ageInput, 20)
-  await fireEvent.blur(ageInput)
-  expect(screen.queryByText(requiredRE)).not.toBeInTheDocument()
-  expect(screen.queryByText(numberRE)).not.toBeInTheDocument()
+  const { wrapper, ageInput } = setup()
+  await ageInput.setValue(20)
+  await ageInput.trigger('blur')
+  expect(wrapper.find('.el-form-item__error').exists()).toBeFalsy()
   expect(console.warn).not.toHaveBeenCalled()
 })
 
 test('resets form when click Reset button', async () => {
-  const { ageInput } = setup()
-  const submitBtn = screen.getByRole('button', { name: /reset/i })
-  await fireEvent.click(submitBtn)
-  expect(ageInput).toHaveValue('')
-  expect(screen.queryByText(requiredRE)).not.toBeInTheDocument()
-  expect(screen.queryByText(numberRE)).not.toBeInTheDocument()
+  const { wrapper, ageInput } = setup()
+  await wrapper.find('.reset-btn').trigger('click')
+  expect(ageInput.element).toHaveValue('')
+  expect(wrapper.find('.el-form-item__error').exists()).toBeFalsy()
   expect(console.warn).not.toHaveBeenCalled()
 })

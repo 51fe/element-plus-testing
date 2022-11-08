@@ -19,6 +19,7 @@
     <el-form-item>
       <el-button
         type="primary"
+        class="submit-btn"
         @click="submitForm(formRef)"
       >
         Submit

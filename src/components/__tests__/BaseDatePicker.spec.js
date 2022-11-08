@@ -1,44 +1,28 @@
-import dayjs from 'dayjs'
-import { fireEvent, screen, render, within } from '../../test-util'
+import { mount } from '../../test-util'
 import BaseDatePicker from '../BaseDatePicker.vue'
 
 test('renders correctly by default', () => {
-  render(BaseDatePicker)
-  const picker = screen.getByPlaceholderText('请选择')
-  expect(picker).toHaveValue('')
+  const wrapper = mount(BaseDatePicker)
+  expect(wrapper.props('placeholder')).toBe('请选择')
+  expect(wrapper.props('modelValue')).toBe('')
 })
 
 test('changes props correctly', async () => {
   const modelValue = '2022-08-15 00:00:00'
   const placeholder = '开始日期'
-  render(BaseDatePicker, {
-    props: {
-      modelValue,
-      placeholder
-    }
-  })
+  const wrapper = mount(BaseDatePicker)
   // Placeholder
-  const picker = screen.getByPlaceholderText(placeholder)
+  await wrapper.setProps({ placeholder })
+  expect(wrapper.props('placeholder')).toBe(placeholder)
   // modelValue
-  await fireEvent.focus(picker)
-  const dialog = await screen.findByRole('dialog')
-  within(dialog).getByText(/2022 年/)
-  within(dialog).getByText(/8 月/)
-  const cell = within(dialog).getByRole('cell', { name: /15/ })
-  expect(cell).toHaveClass('current')
+  await wrapper.setProps({ modelValue })
+  expect(wrapper.props('modelValue')).toBe(modelValue)
 })
 
 test('emits input event correctly', async () => {
-  const day = 15
-  const { emitted } = render(BaseDatePicker)
-  // opens the dropdown menu by focus the input
-  await fireEvent.focus(screen.getByRole('textbox'))
-  const today = new Date()
-  const cell = screen.getByRole('cell', { name: String(day) })
-  // emits the event when click the date button
-  await fireEvent.click(cell)
-  const selected = today.setDate(day)
-  const dateTimeStr = dayjs(selected).format('YYYY-MM-DD 00:00:00')
-  expect(emitted()['update:modelValue'][0]).toEqual([dateTimeStr])
+  const modelValue = '2022-08-15 00:00:00'
+  const wrapper = mount(BaseDatePicker)
+  await wrapper.setValue(modelValue)
+  expect(wrapper.emitted('update:modelValue')[0]).toEqual([modelValue])
 })
 
