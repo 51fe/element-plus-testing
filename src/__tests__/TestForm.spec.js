@@ -50,10 +50,10 @@ test('form is valid when input a number', async () => {
 
 test('resets form when click Reset button', async () => {
   const { ageInput } = setup()
-  const submitBtn = screen.getByRole('button', { name: /reset/i })
-  await fireEvent.click(submitBtn)
+  const resetBtn = screen.getByRole('button', { name: /reset/i })
+  await fireEvent.click(resetBtn)
   expect(ageInput).toHaveValue('')
-  expect(screen.queryByText(requiredRE)).toBeNull()
-  expect(screen.queryByText(numberRE)).toBeNull()
+  expect(screen.queryByText(requiredRE)).not.toBeInTheDocument()
+  expect(screen.queryByText(numberRE)).not.toBeInTheDocument()
   expect(console.warn).not.toHaveBeenCalled()
 })
