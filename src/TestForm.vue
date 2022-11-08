@@ -19,11 +19,17 @@
     <el-form-item>
       <el-button
         type="primary"
+        class="submit-btn"
         @click="submitForm(formRef)"
       >
         Submit
       </el-button>
-      <el-button @click="resetForm(formRef)"> Reset </el-button>
+      <el-button
+        class="reset-btn"
+        @click="resetForm(formRef)"
+      >
+        Reset
+      </el-button>
     </el-form-item>
   </el-form>
 </template>
