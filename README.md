@@ -1,6 +1,8 @@
 # Element-plus testing
 
-It's easy to test vue App with vue testing library, but if the App used a UI library (e.g. element-plus), things will become difficult. Here are some my used samples. If they can be helpful for you, I'll be very happy!
+It's easy to test vue App with vitest and vue testing library, but if the App used a UI library (e.g. element-plus), things will become difficult. Here are some my used samples. If they can be helpful for you, I'll be very happy!
+
+We needn't use fake timers. But unluckily, the form validation can't be passed because `formEl.validate()` always returns true.
 
 ## Recommended IDE Setup
 
