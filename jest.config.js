@@ -15,6 +15,5 @@ module.exports = {
   // fix the bug - ReferenceError: Vue is not defined
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons'],
-  },
-  setupFilesAfterEnv: ['<rootDir>/jest-setup.js']
+  }
 }
